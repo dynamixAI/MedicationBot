@@ -1,13 +1,42 @@
-from medbot.caregiver_manager import list_caregivers
-from medbot.missed_dose_manager import build_caregiver_missed_dose_alert
+from medbot.caregiver_manager import (
+    activate_caregiver,
+    add_caregiver,
+    deactivate_caregiver,
+    list_active_caregivers,
+    list_caregivers,
+    remove_caregiver,
+)
 
 
 def main():
-    print("Active caregivers:")
-    print(list_caregivers("default"))
+    print("Current caregivers:")
+    print(list_caregivers())
 
-    print("\nCaregiver alert:")
-    print(build_caregiver_missed_dose_alert("1", "08:00"))
+    new_caregiver = add_caregiver(
+        name="John",
+        telegram_id="111222333",
+    )
+
+    print("\nAdded caregiver:")
+    print(new_caregiver)
+
+    print("\nAll caregivers:")
+    print(list_caregivers())
+
+    deactivate_caregiver(new_caregiver["caregiver_id"])
+
+    print("\nActive caregivers after deactivate:")
+    print(list_active_caregivers())
+
+    activate_caregiver(new_caregiver["caregiver_id"])
+
+    print("\nActive caregivers after reactivate:")
+    print(list_active_caregivers())
+
+    remove_caregiver(new_caregiver["caregiver_id"])
+
+    print("\nAll caregivers after remove:")
+    print(list_caregivers())
 
 
 if __name__ == "__main__":
