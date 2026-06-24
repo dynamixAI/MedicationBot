@@ -98,3 +98,31 @@ def appointment_reminder(
         f"Time: {time}\n"
         f"Location: {location}"
     )
+
+
+def welcome_message(display_name: str | None = None) -> str:
+    """Build the MediBot welcome message."""
+
+    if display_name:
+        return (
+            f"💊 Welcome back, {display_name}!\n\n"
+            "I'm ready to help you manage:\n\n"
+            "💊 Medications\n"
+            "📅 Appointments\n"
+            "👥 Caregivers\n"
+            "📦 Prescription stock\n"
+            "🔔 Reminders\n\n"
+            "Type /help whenever you need assistance."
+        )
+
+    return (
+        "💊 Welcome to MediBot!\n\n"
+        "Your personal medication and health companion.\n\n"
+        "I can help you manage:\n\n"
+        "💊 Medications\n"
+        "📅 Appointments\n"
+        "👥 Caregivers\n"
+        "📦 Prescription stock\n"
+        "🔔 Reminders\n\n"
+        "Type /help to get started."
+    )

@@ -2,12 +2,13 @@
 main.py
 
 Application entry point for MedicationBot.
-Telegram integration will start from here later.
 """
+
+from medbot.telegram_bot import run_bot
 
 
 def main():
-    print("MedicationBot backend is ready.")
+    run_bot()
 
 
 if __name__ == "__main__":
