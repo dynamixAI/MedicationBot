@@ -1,9 +1,9 @@
-from medbot.medication_manager import (
-    add_medication,
-    edit_medication,
-    get_medication,
-    list_medications,
-    remove_medication,
+from medbot.medication_manager import list_medications
+from medbot.schedule_manager import (
+    add_schedule,
+    get_schedules_for_medication,
+    list_schedules,
+    remove_schedules_for_medication,
 )
 
 
@@ -11,20 +11,23 @@ def main():
     print("Current medications:")
     print(list_medications())
 
-    new_med = add_medication("Vitamin D", "1000IU", "1")
-    print("Added medication:")
-    print(new_med)
+    print("Adding schedules for medication 1...")
+    add_schedule("1", "08:00")
+    add_schedule("1", "12:00")
+    add_schedule("1", "16:00")
+    add_schedule("1", "20:00")
 
-    print("After add:")
-    print(list_medications())
+    print("All schedules:")
+    print(list_schedules())
 
-    edit_medication(new_med["medication_id"], {"dose_amount": "2"})
-    print("After edit:")
-    print(get_medication(new_med["medication_id"]))
+    print("Schedules for medication 1:")
+    print(get_schedules_for_medication("1"))
 
-    remove_medication(new_med["medication_id"])
-    print("After delete:")
-    print(list_medications())
+    removed_count = remove_schedules_for_medication("1")
+    print(f"Removed schedules: {removed_count}")
+
+    print("Schedules after delete:")
+    print(list_schedules())
 
 
 if __name__ == "__main__":
