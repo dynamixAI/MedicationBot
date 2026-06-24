@@ -11,7 +11,13 @@ When a dose is taken:
 
 from typing import Dict
 
-from medbot.inventory_manager import get_stock, is_stock_low, reduce_stock
+from medbot.inventory_manager import (
+    get_stock,
+    is_soft_alert_due,
+    is_urgent_alert_due,
+    reduce_stock,
+)
+
 from medbot.log_manager import record_medication_event
 
 
@@ -31,8 +37,8 @@ def mark_dose_taken(
     reduce_stock(medication_id, quantity_taken)
 
     log["stock_remaining"] = get_stock(medication_id)
-    log["stock_low"] = str(is_stock_low(medication_id))
-
+    log["soft_alert_due"] = str(is_soft_alert_due(medication_id))
+    log["urgent_alert_due"] = str(is_urgent_alert_due(medication_id))
     return log
 
 

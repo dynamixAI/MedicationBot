@@ -1,27 +1,28 @@
-from medbot.inventory_manager import (
-    get_stock,
-    set_stock,
-    calculate_days_remaining,
+from datetime import datetime
+
+from medbot.missed_dose_manager import (
+    build_missed_dose_alert,
+    process_missed_dose,
 )
 
 
 def main():
+    test_time = datetime.now().replace(hour=9, minute=0, second=0, microsecond=0)
 
-    print("Current stock:")
-    print(get_stock("1"))
-
-    print("\nCorrecting stock to 112...")
-
-    set_stock(
+    missed_log = process_missed_dose(
         medication_id="1",
-        new_stock="112",
+        scheduled_time="08:00",
+        grace_minutes=30,
+        current_time=test_time,
     )
 
-    print("\nUpdated stock:")
-    print(get_stock("1"))
-
-    print("\nDays remaining:")
-    print(calculate_days_remaining("1"))
+    if missed_log:
+        print("Missed dose logged:")
+        print(missed_log)
+        print()
+        print(build_missed_dose_alert("1", "08:00"))
+    else:
+        print("Dose is not missed yet.")
 
 
 if __name__ == "__main__":
