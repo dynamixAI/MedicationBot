@@ -10,7 +10,7 @@ from medbot.inventory_manager import (
 
 
 def main():
-    reduce_stock("1", "180")
+    reduce_stock("1", "20")
 
     if is_urgent_alert_due("1"):
         print(build_urgent_stock_alert("1"))
