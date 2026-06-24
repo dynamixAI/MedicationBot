@@ -1,4 +1,5 @@
-from medbot.dose_service import mark_dose_taken, mark_dose_missed
+from medbot.alert_manager import build_low_stock_alert
+from medbot.dose_service import mark_dose_taken
 from medbot.inventory_manager import get_stock
 
 
@@ -6,25 +7,20 @@ def main():
     print("Stock before:")
     print(get_stock("1"))
 
-    taken_log = mark_dose_taken(
+    result = mark_dose_taken(
         medication_id="1",
         scheduled_time="08:00",
-        quantity_taken="2",
+        quantity_taken="100",
     )
 
-    print("Taken log:")
-    print(taken_log)
+    print("Dose result:")
+    print(result)
 
-    print("Stock after taken:")
+    print("Stock after:")
     print(get_stock("1"))
 
-    missed_log = mark_dose_missed(
-        medication_id="1",
-        scheduled_time="12:00",
-    )
-
-    print("Missed log:")
-    print(missed_log)
+    if result["stock_low"] == "True":
+        print(build_low_stock_alert("1"))
 
 
 if __name__ == "__main__":
