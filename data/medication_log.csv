@@ -6,3 +6,5 @@ log_id,medication_id,scheduled_time,actual_time,status,quantity_taken
 5,1,08:00,18:11,taken,100
 6,1,08:00,19:17,missed,0
 7,1,08:00,19:25,missed,0
+8,1,08:00,19:57,missed,0
+9,1,08:00,19:58,missed,0

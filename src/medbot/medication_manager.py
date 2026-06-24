@@ -21,6 +21,7 @@ from medbot.storage import (
 MEDICATION_FILE = "medications.csv"
 
 MEDICATION_HEADERS = [
+    "owner_id",
     "medication_id",
     "name",
     "strength",
@@ -32,14 +33,29 @@ MEDICATION_HEADERS = [
 ]
 
 
-def list_medications() -> List[Dict[str, str]]:
-    """Return all medications."""
-    return load_records(MEDICATION_FILE)
+def list_medications(owner_id: str = "default") -> List[Dict[str, str]]:
+    """Return all medications for an owner."""
+    medications = load_records(MEDICATION_FILE)
+
+    return [
+        medication
+        for medication in medications
+        if medication.get("owner_id") == owner_id
+    ]
 
 
-def get_medication(medication_id: str) -> Optional[Dict[str, str]]:
-    """Return one medication by ID."""
-    return find_record(MEDICATION_FILE, "medication_id", medication_id)
+def get_medication(
+    medication_id: str,
+    owner_id: str = "default",
+) -> Optional[Dict[str, str]]:
+    """Return one medication by ID for an owner."""
+    medications = list_medications(owner_id)
+
+    for medication in medications:
+        if medication.get("medication_id") == medication_id:
+            return medication
+
+    return None
 
 
 def add_medication(name: str, strength: str, dose_amount: str) -> Dict[str, str]:
