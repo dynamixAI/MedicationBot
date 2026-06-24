@@ -3,7 +3,7 @@ missed_dose_manager.py
 
 Detects missed medication doses.
 """
-
+from medbot.profile_manager import get_display_name
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
@@ -72,3 +72,25 @@ def build_missed_dose_alert(
     "If you've already taken it, please confirm it in the app.\n"
     "If not, please take your medication as prescribed."
 )
+
+def build_caregiver_missed_dose_alert(
+    medication_id: str,
+    scheduled_time: str,
+    owner_id: str = "default",
+) -> Optional[str]:
+    """Build caregiver missed dose alert text."""
+    medication = get_medication(medication_id, owner_id)
+
+    if medication is None:
+        return None
+
+    display_name = get_display_name(owner_id) or "The user"
+
+    return (
+        "💊 Caregiver Notification\n\n"
+        f"{display_name} has not confirmed a scheduled medication.\n\n"
+        f"Medication: {medication['name']} {medication['strength']}\n"
+        f"Scheduled: {scheduled_time}\n\n"
+        "No confirmation received.\n\n"
+        "Please check in."
+    )
