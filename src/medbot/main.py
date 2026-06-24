@@ -1,25 +1,19 @@
-from medbot.schedule_manager import add_schedule
-from medbot.scheduler import build_today_events
+from medbot.log_manager import list_logs, record_medication_event
 
 
 def main():
+    log = record_medication_event(
+        medication_id="1",
+        scheduled_time="08:00",
+        status="taken",
+        quantity_taken="2",
+    )
 
-    add_schedule("1", "08:00")
-    add_schedule("1", "12:00")
-    add_schedule("1", "16:00")
-    add_schedule("1", "20:00")
+    print("New log:")
+    print(log)
 
-    events = build_today_events()
-
-    print("\nToday's Events\n")
-
-    for event in events:
-        print(
-            f"{event['time']} - "
-            f"{event['name']} "
-            f"{event['strength']} "
-            f"Take {event['dose_amount']}"
-        )
+    print("All logs:")
+    print(list_logs())
 
 
 if __name__ == "__main__":
