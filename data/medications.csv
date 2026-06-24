@@ -1,2 +1,2 @@
-medication_id,name,strength,dose_amount
-1,Paracetamol,500mg,2
+medication_id,name,strength,dose_amount,stock_remaining,reorder_threshold
+1,Paracetamol,500mg,2,118,20

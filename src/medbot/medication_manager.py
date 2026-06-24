@@ -25,6 +25,8 @@ MEDICATION_HEADERS = [
     "name",
     "strength",
     "dose_amount",
+    "stock_remaining",
+    "reorder_threshold",
 ]
 
 
