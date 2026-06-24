@@ -1,42 +1,26 @@
-from medbot.caregiver_manager import (
-    activate_caregiver,
-    add_caregiver,
-    deactivate_caregiver,
-    list_active_caregivers,
-    list_caregivers,
-    remove_caregiver,
+from medbot.message_templates import (
+    caregiver_no_confirmation_alert,
+    medication_reminder,
+    missed_dose_user_reminder,
+    soft_stock_alert,
+    urgent_stock_alert,
 )
 
 
 def main():
-    print("Current caregivers:")
-    print(list_caregivers())
+    print(medication_reminder("Paracetamol", "500mg", "08:00"))
+    print("\n---\n")
 
-    new_caregiver = add_caregiver(
-        name="John",
-        telegram_id="111222333",
-    )
+    print(missed_dose_user_reminder("Paracetamol", "500mg", "08:00"))
+    print("\n---\n")
 
-    print("\nAdded caregiver:")
-    print(new_caregiver)
+    print(caregiver_no_confirmation_alert("Sarah", "Paracetamol", "500mg", "08:00"))
+    print("\n---\n")
 
-    print("\nAll caregivers:")
-    print(list_caregivers())
+    print(soft_stock_alert("Paracetamol", "500mg", "40", 5))
+    print("\n---\n")
 
-    deactivate_caregiver(new_caregiver["caregiver_id"])
-
-    print("\nActive caregivers after deactivate:")
-    print(list_active_caregivers())
-
-    activate_caregiver(new_caregiver["caregiver_id"])
-
-    print("\nActive caregivers after reactivate:")
-    print(list_active_caregivers())
-
-    remove_caregiver(new_caregiver["caregiver_id"])
-
-    print("\nAll caregivers after remove:")
-    print(list_caregivers())
+    print(urgent_stock_alert("Paracetamol", "500mg", "16", 2))
 
 
 if __name__ == "__main__":
