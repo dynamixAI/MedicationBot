@@ -1,1 +1,2 @@
 owner_id,appointment_id,date,time,reason,location,activedefault,1,2026-07-01,10:30,GP appointment,Town Centre Medical Practice,true
+default,1,2026-07-01,10:30,GP appointment,Town Centre Medical Practice,true
