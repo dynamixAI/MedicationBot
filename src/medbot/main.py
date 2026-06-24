@@ -1,35 +1,66 @@
 from medbot.storage import (
-    ensure_file_exists,
     append_record,
-    load_records
+    delete_record,
+    find_record,
+    get_next_id,
+    load_records,
+    update_record,
 )
 
 
-def main():
+MEDICATION_HEADERS = [
+    "medication_id",
+    "name",
+    "strength",
+    "dose_amount",
+]
 
-    ensure_file_exists(
+
+def main():
+    print("Current records:")
+    print(load_records("medications.csv"))
+
+    next_id = get_next_id("medications.csv", "medication_id")
+    print(f"Next ID: {next_id}")
+
+    found = find_record("medications.csv", "medication_id", "1")
+    print("Found record:")
+    print(found)
+
+    update_record(
         "medications.csv",
-        [
-            "medication_id",
-            "name",
-            "strength",
-            "dose_amount"
-        ]
+        "medication_id",
+        "1",
+        {"dose_amount": "2"},
+        MEDICATION_HEADERS,
     )
 
-   # append_record(
-    #    "medications.csv",
-     #   {
-      #      "medication_id": "1",
-       #     "name": "Paracetamol",
-        #    "strength": "500mg",
-         #   "dose_amount": "3"
-        #}
-    #)
+    print("After update:")
+    print(load_records("medications.csv"))
 
-    records = load_records("medications.csv")
+    append_record(
+        "medications.csv",
+        {
+            "medication_id": get_next_id("medications.csv", "medication_id"),
+            "name": "Vitamin D",
+            "strength": "1000IU",
+            "dose_amount": "1",
+        },
+        MEDICATION_HEADERS,
+    )
 
-    print(records)
+    print("After append:")
+    print(load_records("medications.csv"))
+
+    delete_record(
+        "medications.csv",
+        "name",
+        "Vitamin D",
+        MEDICATION_HEADERS,
+    )
+
+    print("After delete:")
+    print(load_records("medications.csv"))
 
 
 if __name__ == "__main__":
