@@ -1,26 +1,58 @@
-from medbot.message_templates import (
-    caregiver_no_confirmation_alert,
-    medication_reminder,
-    missed_dose_user_reminder,
-    soft_stock_alert,
-    urgent_stock_alert,
+from datetime import datetime
+
+from medbot.appointment_manager import (
+    add_appointment,
+    list_past_appointments,
+    list_upcoming_appointments,
+    reminder_due,
 )
+from medbot.message_templates import appointment_reminder
 
 
 def main():
-    print(medication_reminder("Paracetamol", "500mg", "08:00"))
-    print("\n---\n")
+    appointment = add_appointment(
+        date="2026-07-01",
+        time="10:30",
+        reason="GP appointment",
+        location="Town Centre Medical Practice",
+    )
 
-    print(missed_dose_user_reminder("Paracetamol", "500mg", "08:00"))
-    print("\n---\n")
+    print("Added appointment:")
+    print(appointment)
 
-    print(caregiver_no_confirmation_alert("Sarah", "Paracetamol", "500mg", "08:00"))
-    print("\n---\n")
+    print("\nUpcoming appointments:")
+    print(list_upcoming_appointments())
 
-    print(soft_stock_alert("Paracetamol", "500mg", "40", 5))
-    print("\n---\n")
+    print("\nPast appointments:")
+    print(list_past_appointments())
 
-    print(urgent_stock_alert("Paracetamol", "500mg", "16", 2))
+    test_time = datetime(2026, 6, 28, 10, 30)
+
+    if reminder_due(appointment, 72, test_time):
+        print("\n3-day reminder:")
+        print(
+            appointment_reminder(
+                appointment["reason"],
+                appointment["date"],
+                appointment["time"],
+                appointment["location"],
+                "3 days before",
+            )
+        )
+
+    test_time = datetime(2026, 6, 30, 10, 30)
+
+    if reminder_due(appointment, 24, test_time):
+        print("\n24-hour reminder:")
+        print(
+            appointment_reminder(
+                appointment["reason"],
+                appointment["date"],
+                appointment["time"],
+                appointment["location"],
+                "24 hours before",
+            )
+        )
 
 
 if __name__ == "__main__":

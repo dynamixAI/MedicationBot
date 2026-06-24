@@ -82,3 +82,19 @@ def urgent_stock_alert(
         f"Estimated days remaining: {days_remaining}\n\n"
         "Please order your prescription as soon as possible."
     )
+
+def appointment_reminder(
+    reason: str,
+    date: str,
+    time: str,
+    location: str,
+    reminder_label: str,
+) -> str:
+    """Appointment reminder message."""
+    return (
+        f"📅 Appointment Reminder - {reminder_label}\n\n"
+        f"Reason: {reason}\n"
+        f"Date: {date}\n"
+        f"Time: {time}\n"
+        f"Location: {location}"
+    )
