@@ -1,2 +1,2 @@
-medication_id,name,strength,dose_amount,stock_remaining,reorder_threshold
-1,Paracetamol,500mg,2,0,20
+medication_id,name,strength,dose_amount,stock_remaining,soft_alert_days,urgent_alert_days,active
+1,Paracetamol,500mg,2,216,5,3,true

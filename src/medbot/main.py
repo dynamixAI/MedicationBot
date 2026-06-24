@@ -1,26 +1,37 @@
-from medbot.alert_manager import build_low_stock_alert
-from medbot.dose_service import mark_dose_taken
-from medbot.inventory_manager import get_stock
+from medbot.inventory_manager import (
+    add_refill,
+    calculate_daily_usage,
+    calculate_days_remaining,
+    get_stock,
+    is_soft_alert_due,
+    is_urgent_alert_due,
+)
 
 
 def main():
-    print("Stock before:")
+    print("Stock:")
     print(get_stock("1"))
 
-    result = mark_dose_taken(
-        medication_id="1",
-        scheduled_time="08:00",
-        quantity_taken="100",
-    )
+    print("Daily usage:")
+    print(calculate_daily_usage("1"))
 
-    print("Dose result:")
-    print(result)
+    print("Days remaining:")
+    print(calculate_days_remaining("1"))
 
-    print("Stock after:")
+    print("Soft alert due?")
+    print(is_soft_alert_due("1"))
+
+    print("Urgent alert due?")
+    print(is_urgent_alert_due("1"))
+
+    print("Adding refill of 100...")
+    add_refill("1", "100")
+
+    print("Stock after refill:")
     print(get_stock("1"))
 
-    if result["stock_low"] == "True":
-        print(build_low_stock_alert("1"))
+    print("Days remaining after refill:")
+    print(calculate_days_remaining("1"))
 
 
 if __name__ == "__main__":

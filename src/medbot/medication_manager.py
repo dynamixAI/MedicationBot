@@ -26,7 +26,9 @@ MEDICATION_HEADERS = [
     "strength",
     "dose_amount",
     "stock_remaining",
-    "reorder_threshold",
+    "soft_alert_days",
+    "urgent_alert_days",
+    "active",
 ]
 
 
