@@ -74,3 +74,19 @@ def remove_medication(medication_id: str) -> bool:
         medication_id,
         MEDICATION_HEADERS,
     )
+
+def find_medication_by_name_and_strength(
+    name: str,
+    strength: str,
+) -> Optional[Dict[str, str]]:
+    """Find an existing medication by name and strength."""
+    medications = list_medications()
+
+    for medication in medications:
+        if (
+            medication.get("name", "").lower() == name.lower()
+            and medication.get("strength", "").lower() == strength.lower()
+        ):
+            return medication
+
+    return None
