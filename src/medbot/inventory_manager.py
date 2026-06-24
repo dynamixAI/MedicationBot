@@ -56,6 +56,26 @@ def add_refill(medication_id: str, quantity_added: str) -> bool:
         {"stock_remaining": str(new_stock)},
     )
 
+def set_stock(
+    medication_id: str,
+    new_stock: str,
+) -> bool:
+    """
+    Replace stock with a corrected value.
+    """
+
+    medication = get_medication(medication_id)
+
+    if medication is None:
+        return False
+
+    return edit_medication(
+        medication_id,
+        {
+            "stock_remaining": str(new_stock)
+        },
+    )
+
 
 def calculate_daily_usage(medication_id: str) -> int:
     """Calculate how many tablets/capsules are used per day."""

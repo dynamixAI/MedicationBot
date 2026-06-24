@@ -1,21 +1,27 @@
-from medbot.medication_manager import find_medication_by_name_and_strength
+from medbot.inventory_manager import (
+    get_stock,
+    set_stock,
+    calculate_days_remaining,
+)
 
 
 def main():
-    medication = find_medication_by_name_and_strength(
-        "Paracetamol",
-        "500mg",
+
+    print("Current stock:")
+    print(get_stock("1"))
+
+    print("\nCorrecting stock to 112...")
+
+    set_stock(
+        medication_id="1",
+        new_stock="112",
     )
 
-    if medication:
-        print("Medication already exists:")
-        print(medication)
-        print("\nOptions:")
-        print("1. Add refill")
-        print("2. Edit medication")
-        print("3. Create new medication")
-    else:
-        print("Medication does not exist. Create new medication.")
+    print("\nUpdated stock:")
+    print(get_stock("1"))
+
+    print("\nDays remaining:")
+    print(calculate_days_remaining("1"))
 
 
 if __name__ == "__main__":
