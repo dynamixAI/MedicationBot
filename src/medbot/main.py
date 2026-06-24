@@ -1,66 +1,30 @@
-from medbot.storage import (
-    append_record,
-    delete_record,
-    find_record,
-    get_next_id,
-    load_records,
-    update_record,
+from medbot.medication_manager import (
+    add_medication,
+    edit_medication,
+    get_medication,
+    list_medications,
+    remove_medication,
 )
 
 
-MEDICATION_HEADERS = [
-    "medication_id",
-    "name",
-    "strength",
-    "dose_amount",
-]
-
-
 def main():
-    print("Current records:")
-    print(load_records("medications.csv"))
+    print("Current medications:")
+    print(list_medications())
 
-    next_id = get_next_id("medications.csv", "medication_id")
-    print(f"Next ID: {next_id}")
+    new_med = add_medication("Vitamin D", "1000IU", "1")
+    print("Added medication:")
+    print(new_med)
 
-    found = find_record("medications.csv", "medication_id", "1")
-    print("Found record:")
-    print(found)
+    print("After add:")
+    print(list_medications())
 
-    update_record(
-        "medications.csv",
-        "medication_id",
-        "1",
-        {"dose_amount": "2"},
-        MEDICATION_HEADERS,
-    )
+    edit_medication(new_med["medication_id"], {"dose_amount": "2"})
+    print("After edit:")
+    print(get_medication(new_med["medication_id"]))
 
-    print("After update:")
-    print(load_records("medications.csv"))
-
-    append_record(
-        "medications.csv",
-        {
-            "medication_id": get_next_id("medications.csv", "medication_id"),
-            "name": "Vitamin D",
-            "strength": "1000IU",
-            "dose_amount": "1",
-        },
-        MEDICATION_HEADERS,
-    )
-
-    print("After append:")
-    print(load_records("medications.csv"))
-
-    delete_record(
-        "medications.csv",
-        "name",
-        "Vitamin D",
-        MEDICATION_HEADERS,
-    )
-
+    remove_medication(new_med["medication_id"])
     print("After delete:")
-    print(load_records("medications.csv"))
+    print(list_medications())
 
 
 if __name__ == "__main__":
