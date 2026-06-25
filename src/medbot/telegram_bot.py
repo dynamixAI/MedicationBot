@@ -17,11 +17,11 @@ from telegram.ext import (
     filters,
 )
 
-from medbot.menu_manager import back_home_keyboard, main_menu_keyboard
+from medbot.handlers.home_handler import handle_main_menu_callback
+from medbot.menu_manager import main_menu_keyboard
 from medbot.message_templates import (
     first_time_welcome_message,
     home_dashboard_message,
-    menu_placeholder_message,
     profile_created_message,
 )
 from medbot.profile_manager import create_or_update_profile, get_display_name
@@ -76,62 +76,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     )
 
 
-async def handle_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle inline menu button taps."""
-    query = update.callback_query
-    await query.answer()
-
-    owner_id = str(query.from_user.id)
-    display_name = get_display_name(owner_id) or "there"
-
-    if query.data == "menu_home":
-        await query.edit_message_text(
-            home_dashboard_message(display_name),
-            reply_markup=main_menu_keyboard(),
-        )
-        return
-
-    if query.data == "menu_medications":
-        await query.edit_message_text(
-            menu_placeholder_message("💊 My Medications"),
-            reply_markup=back_home_keyboard(),
-        )
-        return
-
-    if query.data == "menu_appointments":
-        await query.edit_message_text(
-            menu_placeholder_message("📅 My Appointments"),
-            reply_markup=back_home_keyboard(),
-        )
-        return
-
-    if query.data == "menu_stock":
-        await query.edit_message_text(
-            menu_placeholder_message("📦 My Stock"),
-            reply_markup=back_home_keyboard(),
-        )
-        return
-
-    if query.data == "menu_history":
-        await query.edit_message_text(
-            menu_placeholder_message("📋 My History"),
-            reply_markup=back_home_keyboard(),
-        )
-        return
-
-    if query.data == "menu_caregivers":
-        await query.edit_message_text(
-            menu_placeholder_message("👥 My Caregivers"),
-            reply_markup=back_home_keyboard(),
-        )
-        return
-
-    if query.data == "menu_more":
-        await query.edit_message_text(
-            menu_placeholder_message("☰ More"),
-            reply_markup=back_home_keyboard(),
-        )
-        return
+async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle all inline button callbacks."""
+    await handle_main_menu_callback(update)
 
 
 def run_bot() -> None:
@@ -146,7 +93,7 @@ def run_bot() -> None:
     app = Application.builder().token(token).build()
 
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(handle_menu))
+    app.add_handler(CallbackQueryHandler(handle_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
     print("MediBot is running...")
