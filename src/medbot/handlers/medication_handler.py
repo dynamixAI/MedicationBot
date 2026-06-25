@@ -7,6 +7,7 @@ Telegram screens for medication management.
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
+from medbot.inventory_manager import add_refill
 from medbot.medication_manager import add_medication, list_medications
 from medbot.schedule_manager import add_schedule, get_schedules_for_medication
 from medbot.time_parser import parse_time_list, recommend_times
@@ -17,6 +18,7 @@ def medication_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
             [InlineKeyboardButton("➕ Add Medication", callback_data="med_add")],
+            [InlineKeyboardButton("📦 Refill Medication", callback_data="med_refill")],
             [InlineKeyboardButton("⬅️ Home", callback_data="menu_home")],
         ]
     )
@@ -25,9 +27,7 @@ def medication_keyboard() -> InlineKeyboardMarkup:
 def cancel_keyboard() -> InlineKeyboardMarkup:
     """Cancel keyboard."""
     return InlineKeyboardMarkup(
-        [
-            [InlineKeyboardButton("❌ Cancel", callback_data="med_cancel")]
-        ]
+        [[InlineKeyboardButton("❌ Cancel", callback_data="med_cancel")]]
     )
 
 
@@ -107,15 +107,63 @@ async def start_add_medication(update: Update, context: ContextTypes.DEFAULT_TYP
     )
 
 
-async def cancel_add_medication(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Cancel medication add flow."""
+async def start_refill_medication(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> None:
+    """Show medication selection before refill."""
+    query = update.callback_query
+    await query.answer()
+
+    owner_id = str(query.from_user.id)
+    medications = list_medications(owner_id)
+
+    if not medications:
+        await query.edit_message_text(
+            "📦 Refill Medication\n\n"
+            "You have not added any medications yet.",
+            reply_markup=medication_keyboard(),
+        )
+        return
+
+    buttons = []
+
+    for medication in medications:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    f"{medication['name']} {medication['strength']}",
+                    callback_data=f"med_refill_select_{medication['medication_id']}",
+                )
+            ]
+        )
+
+    buttons.append(
+        [InlineKeyboardButton("⬅️ Back", callback_data="menu_medications")]
+    )
+
+    await query.edit_message_text(
+        "📦 Refill Medication\n\n"
+        "Which medication did you receive?",
+        reply_markup=InlineKeyboardMarkup(buttons),
+    )
+
+
+async def cancel_medication_flow(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> None:
+    """Cancel medication-related flows."""
     query = update.callback_query
     await query.answer()
 
     context.user_data.pop("add_medication", None)
+    context.user_data.pop("refill_medication", None)
+
+    owner_id = str(query.from_user.id)
 
     await query.edit_message_text(
-        "Medication setup cancelled.",
+        build_medication_screen(owner_id),
         reply_markup=medication_keyboard(),
     )
 
@@ -135,18 +183,104 @@ async def handle_medication_callback(
         await start_add_medication(update, context)
         return True
 
+    if query.data == "med_refill":
+        await start_refill_medication(update, context)
+        return True
+
     if query.data == "med_cancel":
-        await cancel_add_medication(update, context)
+        await cancel_medication_flow(update, context)
+        return True
+
+    if query.data.startswith("med_refill_select_"):
+        medication_id = query.data.replace("med_refill_select_", "")
+        owner_id = str(query.from_user.id)
+
+        medications = list_medications(owner_id)
+        medication = next(
+            (
+                item
+                for item in medications
+                if item["medication_id"] == medication_id
+            ),
+            None,
+        )
+
+        if medication is None:
+            await query.answer()
+            await query.edit_message_text(
+                "I couldn't find that medication.",
+                reply_markup=medication_keyboard(),
+            )
+            return True
+
+        context.user_data["refill_medication"] = {
+            "medication_id": medication["medication_id"],
+            "name": medication["name"],
+            "strength": medication["strength"],
+        }
+
+        await query.answer()
+        await query.edit_message_text(
+            "📦 Refill Medication\n\n"
+            f"Medication: {medication['name']} {medication['strength']}\n\n"
+            "How many tablets/capsules did you receive?",
+            reply_markup=cancel_keyboard(),
+        )
         return True
 
     return False
+
+
+async def handle_refill_text(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> bool:
+    """Handle refill text input."""
+    refill = context.user_data.get("refill_medication")
+
+    if not refill:
+        return False
+
+    owner_id = str(update.effective_user.id)
+    text = update.message.text.strip()
+
+    if not text.isdigit():
+        await update.message.reply_text(
+            "Please enter a number, for example: 100"
+        )
+        return True
+
+    quantity_added = text
+
+    add_refill(
+        medication_id=refill["medication_id"],
+        quantity_added=quantity_added,
+    )
+
+    context.user_data.pop("refill_medication", None)
+
+    await update.message.reply_text(
+        "✅ Refill added successfully.\n\n"
+        f"{refill['name']} {refill['strength']}\n"
+        f"Added: {quantity_added}"
+    )
+
+    await update.message.reply_text(
+        build_medication_screen(owner_id),
+        reply_markup=medication_keyboard(),
+    )
+
+    return True
 
 
 async def handle_medication_text(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ) -> bool:
-    """Handle medication add text flow. Returns True if handled."""
+    """Handle medication text flows. Returns True if handled."""
+    if await handle_refill_text(update, context):
+        return True
+
     flow = context.user_data.get("add_medication")
 
     if not flow:
