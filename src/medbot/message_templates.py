@@ -126,3 +126,38 @@ def welcome_message(display_name: str | None = None) -> str:
         "🔔 Reminders\n\n"
         "Type /help to get started."
     )
+
+def first_time_welcome_message() -> str:
+    """Welcome message for first-time users."""
+    return (
+        "👋 Welcome to MediBot!\n\n"
+        "I'm here to help you manage your medications, appointments, "
+        "prescription stock and caregiver reminders.\n\n"
+        "Before we get started, what would you like me to call you?"
+    )
+
+
+def profile_created_message(display_name: str) -> str:
+    """Message after profile creation."""
+    return (
+        f"Nice to meet you, {display_name}! 🎉\n\n"
+        "Your profile has been created.\n\n"
+        "Type /help to see what I can do."
+    )
+
+def home_dashboard_message(display_name: str) -> str:
+    """Build the main home dashboard message."""
+    return (
+        f"👋 Welcome back, {display_name}!\n\n"
+        "I hope you're doing well.\n\n"
+        "What would you like to do today?"
+    )
+
+
+def menu_placeholder_message(section_name: str) -> str:
+    """Temporary message for menu sections not yet built."""
+    return (
+        f"{section_name}\n\n"
+        "This section is coming next. "
+        "We'll build it step by step."
+    )
