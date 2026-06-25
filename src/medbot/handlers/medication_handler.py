@@ -9,6 +9,7 @@ from telegram.ext import ContextTypes
 
 from medbot.medication_manager import add_medication, list_medications
 from medbot.schedule_manager import add_schedule, get_schedules_for_medication
+from medbot.time_parser import parse_time_list, recommend_times
 
 
 def medication_keyboard() -> InlineKeyboardMarkup:
@@ -58,10 +59,7 @@ def build_medication_screen(owner_id: str) -> str:
         stock = int(medication.get("stock_remaining", "0"))
         daily_usage = dose_amount * len(schedules)
 
-        if daily_usage > 0:
-            days_remaining = stock // daily_usage
-        else:
-            days_remaining = 0
+        days_remaining = stock // daily_usage if daily_usage > 0 else 0
 
         times = ", ".join(schedule["time"] for schedule in schedules) or "No times set"
 
@@ -196,23 +194,68 @@ async def handle_medication_text(
             return True
 
         data["stock_remaining"] = text
-        flow["step"] = "times"
+        flow["step"] = "times_per_day"
 
         await update.message.reply_text(
-            "What times should I remind you?\n\n"
-            "Enter times separated by commas.\n\n"
-            "Example: 08:00, 12:00, 16:00, 20:00"
+            "How many times per day should this medication be taken?\n\n"
+            "Example: 1, 2, 3 or 4"
         )
         return True
 
-    if step == "times":
-        times = [item.strip() for item in text.split(",") if item.strip()]
+    if step == "times_per_day":
+        if not text.isdigit():
+            await update.message.reply_text("Please enter a number, for example: 3")
+            return True
 
-        if not times:
+        times_per_day = int(text)
+
+        if times_per_day < 1:
+            await update.message.reply_text("Please enter at least 1 time per day.")
+            return True
+
+        data["times_per_day"] = str(times_per_day)
+
+        suggested_times = recommend_times(times_per_day)
+
+        if suggested_times:
+            data["suggested_times"] = suggested_times
+            flow["step"] = "confirm_times"
+
             await update.message.reply_text(
-                "Please enter at least one time, for example: 08:00"
+                "I recommend these reminder times:\n\n"
+                f"{', '.join(suggested_times)}\n\n"
+                "Reply yes to use these times, or enter your own times.\n\n"
+                "Examples:\n"
+                "9am, 1pm, 9pm\n"
+                "08:00, 14:00, 20:00"
             )
             return True
+
+        flow["step"] = "custom_times"
+
+        await update.message.reply_text(
+            "Please enter the reminder times separated by commas.\n\n"
+            "Examples:\n"
+            "9am, 1pm, 9pm\n"
+            "08:00, 12:00, 16:00, 20:00"
+        )
+        return True
+
+    if step == "confirm_times":
+        if text.lower() in ["yes", "y", "ok", "okay"]:
+            times = data["suggested_times"]
+        else:
+            parsed_times = parse_time_list(text)
+
+            if parsed_times is None:
+                await update.message.reply_text(
+                    "I couldn't understand those times.\n\n"
+                    "Please try again, for example:\n"
+                    "9am, 1pm, 9pm"
+                )
+                return True
+
+            times = parsed_times
 
         medication = add_medication(
             name=data["name"],
@@ -231,9 +274,44 @@ async def handle_medication_text(
 
         context.user_data.pop("add_medication", None)
 
+        await update.message.reply_text("✅ Medication added successfully.")
+
         await update.message.reply_text(
-            "✅ Medication added successfully."
+            build_medication_screen(owner_id),
+            reply_markup=medication_keyboard(),
         )
+
+        return True
+
+    if step == "custom_times":
+        parsed_times = parse_time_list(text)
+
+        if parsed_times is None:
+            await update.message.reply_text(
+                "I couldn't understand those times.\n\n"
+                "Please try again, for example:\n"
+                "9am, 1pm, 9pm"
+            )
+            return True
+
+        medication = add_medication(
+            name=data["name"],
+            strength=data["strength"],
+            dose_amount=data["dose_amount"],
+            stock_remaining=data["stock_remaining"],
+            owner_id=owner_id,
+        )
+
+        for reminder_time in parsed_times:
+            add_schedule(
+                medication_id=medication["medication_id"],
+                time=reminder_time,
+                owner_id=owner_id,
+            )
+
+        context.user_data.pop("add_medication", None)
+
+        await update.message.reply_text("✅ Medication added successfully.")
 
         await update.message.reply_text(
             build_medication_screen(owner_id),

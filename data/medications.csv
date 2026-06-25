@@ -1,3 +1,4 @@
 owner_id,medication_id,name,strength,dose_amount,stock_remaining,soft_alert_days,urgent_alert_days,active
 default,1,Paracetamol,500mg,2,112,5,3,true
 7404392144,2,Fluoxetin,50mg,1,50,5,3,true
+7404392144,3,Omeprazole,10mg,1,20,5,3,true
