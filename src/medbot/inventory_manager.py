@@ -53,7 +53,10 @@ def add_refill(medication_id: str, quantity_added: str) -> bool:
 
     return edit_medication(
         medication_id,
-        {"stock_remaining": str(new_stock)},
+        {
+            "stock_remaining": str(new_stock),
+            "last_refill_quantity": str(quantity_added),
+        },
     )
 
 def set_stock(

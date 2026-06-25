@@ -4,6 +4,8 @@ medication_handler.py
 Router for medication screens and flows.
 """
 
+from medbot.handlers.medication.detail_screen import show_medication_detail_screen
+
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -63,10 +65,7 @@ async def handle_medication_callback(
 
     if query.data.startswith("med_view_"):
         medication_id = query.data.replace("med_view_", "")
-        await query.answer()
-        await query.edit_message_text(
-            f"Medication detail screen coming next for medication ID: {medication_id}"
-        )
+        await show_medication_detail_screen(update, medication_id)
         return True
 
     return False

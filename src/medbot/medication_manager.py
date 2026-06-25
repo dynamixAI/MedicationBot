@@ -24,6 +24,7 @@ MEDICATION_HEADERS = [
     "strength",
     "dose_amount",
     "stock_remaining",
+    "last_refill_quantity",
     "soft_alert_days",
     "urgent_alert_days",
     "active",
@@ -74,6 +75,7 @@ def add_medication(
         "soft_alert_days": soft_alert_days,
         "urgent_alert_days": urgent_alert_days,
         "active": "true",
+        "last_refill_quantity": stock_remaining,
     }
 
     append_record(MEDICATION_FILE, medication, MEDICATION_HEADERS)
