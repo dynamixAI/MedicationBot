@@ -1,5 +1,2 @@
-schedule_id,medication_id,time,active
-1,1,08:00,true
-2,1,12:00,true
-3,1,16:00,true
-4,1,20:00,true
+owner_id,schedule_id,medication_id,time,active
+7404392144,1,2,20:00,true

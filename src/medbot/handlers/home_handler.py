@@ -51,7 +51,6 @@ async def handle_main_menu_callback(update: Update) -> None:
         return
 
     screens = {
-        "menu_medications": "💊 My Medications",
         "menu_appointments": "📅 My Appointments",
         "menu_stock": "📦 My Stock",
         "menu_history": "📋 My History",

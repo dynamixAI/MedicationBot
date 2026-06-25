@@ -17,6 +17,7 @@ from medbot.storage import (
 SCHEDULE_FILE = "medication_schedule.csv"
 
 SCHEDULE_HEADERS = [
+    "owner_id",
     "schedule_id",
     "medication_id",
     "time",
@@ -24,26 +25,38 @@ SCHEDULE_HEADERS = [
 ]
 
 
-def list_schedules() -> List[Dict[str, str]]:
-    """Return all medication schedules."""
-    return load_records(SCHEDULE_FILE)
-
-
-def get_schedules_for_medication(medication_id: str) -> List[Dict[str, str]]:
-    """Return all active schedules for a medication."""
+def list_schedules(owner_id: str = "default") -> List[Dict[str, str]]:
+    """Return all medication schedules for an owner."""
     schedules = load_records(SCHEDULE_FILE)
 
     return [
         schedule
         for schedule in schedules
+        if schedule.get("owner_id") == owner_id
+    ]
+
+
+def get_schedules_for_medication(
+    medication_id: str,
+    owner_id: str = "default",
+) -> List[Dict[str, str]]:
+    """Return all active schedules for a medication."""
+    return [
+        schedule
+        for schedule in list_schedules(owner_id)
         if schedule.get("medication_id") == medication_id
         and schedule.get("active") == "true"
     ]
 
 
-def add_schedule(medication_id: str, time: str) -> Dict[str, str]:
+def add_schedule(
+    medication_id: str,
+    time: str,
+    owner_id: str = "default",
+) -> Dict[str, str]:
     """Add a reminder time for a medication."""
     schedule = {
+        "owner_id": owner_id,
         "schedule_id": get_next_id(SCHEDULE_FILE, "schedule_id"),
         "medication_id": medication_id,
         "time": time,
@@ -62,22 +75,3 @@ def remove_schedule(schedule_id: str) -> bool:
         schedule_id,
         SCHEDULE_HEADERS,
     )
-
-
-def remove_schedules_for_medication(medication_id: str) -> int:
-    """Remove all schedules for a medication. Returns number removed."""
-    schedules = load_records(SCHEDULE_FILE)
-    matching = [
-        schedule
-        for schedule in schedules
-        if schedule.get("medication_id") == medication_id
-    ]
-
-    count = 0
-
-    for schedule in matching:
-        removed = remove_schedule(schedule["schedule_id"])
-        if removed:
-            count += 1
-
-    return count

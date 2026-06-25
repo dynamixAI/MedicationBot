@@ -60,6 +60,15 @@ def append_record(filename: str, record: Dict[str, str], headers: List[str]) -> 
 
     file_path = DATA_DIR / filename
 
+    # Make sure existing file ends with a newline before appending.
+    if file_path.exists() and file_path.stat().st_size > 0:
+        with open(file_path, "rb+") as file:
+            file.seek(-1, 2)
+            last_char = file.read(1)
+
+            if last_char != b"\n":
+                file.write(b"\n")
+
     with open(file_path, "a", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=headers)
         writer.writerow(record)

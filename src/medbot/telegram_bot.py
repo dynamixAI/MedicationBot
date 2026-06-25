@@ -18,6 +18,10 @@ from telegram.ext import (
 )
 
 from medbot.handlers.home_handler import handle_main_menu_callback
+from medbot.handlers.medication_handler import (
+    handle_medication_callback,
+    handle_medication_text,
+)
 from medbot.menu_manager import main_menu_keyboard
 from medbot.message_templates import (
     first_time_welcome_message,
@@ -68,6 +72,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         return
 
+    if await handle_medication_text(update, context):
+        return
+
     display_name = get_display_name(owner_id) or "there"
 
     await update.message.reply_text(
@@ -78,6 +85,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle all inline button callbacks."""
+    if await handle_medication_callback(update, context):
+        return
+
     await handle_main_menu_callback(update)
 
 
