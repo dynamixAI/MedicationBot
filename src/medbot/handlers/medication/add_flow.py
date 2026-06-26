@@ -4,6 +4,9 @@ add_flow.py
 Guided add-medication flow.
 """
 
+import re
+from typing import Optional
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
@@ -20,6 +23,117 @@ def cancel_keyboard() -> InlineKeyboardMarkup:
     """Cancel keyboard."""
     return InlineKeyboardMarkup(
         [[InlineKeyboardButton("❌ Cancel", callback_data="med_cancel")]]
+    )
+
+
+def dose_unit_options() -> dict[str, str]:
+    """Available medication form options."""
+    return {
+        "1": "tablet",
+        "2": "capsule",
+        "3": "ml",
+        "4": "puff",
+        "5": "injection",
+        "6": "application",
+        "7": "patch",
+        "8": "unit",
+    }
+
+
+def dose_unit_question() -> str:
+    """Build medication form question."""
+    return (
+        "What form is this medication?\n\n"
+        "1. Tablet\n"
+        "2. Capsule\n"
+        "3. Liquid\n"
+        "4. Puff / Inhaler\n"
+        "5. Injection\n"
+        "6. Cream / Ointment\n"
+        "7. Patch\n"
+        "8. Other\n\n"
+        "Reply with the number."
+    )
+
+
+def extract_number(text: str) -> Optional[str]:
+    """Extract the first number from user text."""
+    match = re.search(r"\d+", text)
+
+    if not match:
+        return None
+
+    return match.group(0)
+
+
+def dose_amount_question(dose_unit: str) -> str:
+    """Build dose amount question based on medication form."""
+    if dose_unit == "ml":
+        return (
+            "How many ml should be taken per dose?\n\n"
+            "Examples:\n"
+            "5\n"
+            "10ml\n"
+            "20 ml"
+        )
+
+    if dose_unit == "puff":
+        return (
+            "How many puffs should be taken per dose?\n\n"
+            "Examples:\n"
+            "1\n"
+            "2 puffs"
+        )
+
+    if dose_unit == "application":
+        return (
+            "How many applications should be used per dose?\n\n"
+            "Examples:\n"
+            "1\n"
+            "2"
+        )
+
+    return (
+        f"How many {dose_unit}s should be taken per dose?\n\n"
+        "Examples:\n"
+        "1\n"
+        "2"
+    )
+
+
+def stock_amount_question(dose_unit: str) -> str:
+    """Build stock amount question based on medication form."""
+    if dose_unit == "ml":
+        return (
+            "How many ml do you currently have?\n\n"
+            "Examples:\n"
+            "500\n"
+            "500ml\n"
+            "500 ml"
+        )
+
+    if dose_unit == "puff":
+        return (
+            "How many puffs do you currently have?\n\n"
+            "Examples:\n"
+            "120\n"
+            "120 puffs"
+        )
+
+    if dose_unit == "application":
+        return (
+            "How many applications do you currently have?\n\n"
+            "Examples:\n"
+            "30\n"
+            "30 applications"
+        )
+
+    return (
+        f"How many {dose_unit}s do you currently have?\n\n"
+        "Examples:\n"
+        "28\n"
+        "56\n"
+        "100"
     )
 
 
@@ -65,32 +179,58 @@ async def handle_add_medication_text(
 
     if step == "strength":
         data["strength"] = text
+        flow["step"] = "dose_unit"
+
+        await update.message.reply_text(dose_unit_question())
+        return True
+
+    if step == "dose_unit":
+        options = dose_unit_options()
+
+        if text not in options:
+            await update.message.reply_text(
+                "Please choose a number from 1 to 8.\n\n"
+                + dose_unit_question()
+            )
+            return True
+
+        data["dose_unit"] = options[text]
         flow["step"] = "dose_amount"
 
         await update.message.reply_text(
-            "How many tablets/capsules per dose?\n\nExample: 2"
+            dose_amount_question(data["dose_unit"])
         )
         return True
 
     if step == "dose_amount":
-        if not text.isdigit():
-            await update.message.reply_text("Please enter a number, for example: 2")
+        number = extract_number(text)
+
+        if number is None:
+            await update.message.reply_text(
+                "Please enter a number.\n\n"
+                + dose_amount_question(data["dose_unit"])
+            )
             return True
 
-        data["dose_amount"] = text
+        data["dose_amount"] = number
         flow["step"] = "stock_remaining"
 
         await update.message.reply_text(
-            "How many tablets/capsules do you currently have?"
+            stock_amount_question(data["dose_unit"])
         )
         return True
 
     if step == "stock_remaining":
-        if not text.isdigit():
-            await update.message.reply_text("Please enter a number, for example: 120")
+        number = extract_number(text)
+
+        if number is None:
+            await update.message.reply_text(
+                "Please enter a number.\n\n"
+                + stock_amount_question(data["dose_unit"])
+            )
             return True
 
-        data["stock_remaining"] = text
+        data["stock_remaining"] = number
         flow["step"] = "times_per_day"
 
         await update.message.reply_text(
@@ -100,11 +240,13 @@ async def handle_add_medication_text(
         return True
 
     if step == "times_per_day":
-        if not text.isdigit():
+        number = extract_number(text)
+
+        if number is None:
             await update.message.reply_text("Please enter a number, for example: 3")
             return True
 
-        times_per_day = int(text)
+        times_per_day = int(number)
 
         if times_per_day < 1:
             await update.message.reply_text("Please enter at least 1 time per day.")
@@ -158,6 +300,7 @@ async def handle_add_medication_text(
             name=data["name"],
             strength=data["strength"],
             dose_amount=data["dose_amount"],
+            dose_unit=data["dose_unit"],
             stock_remaining=data["stock_remaining"],
             owner_id=owner_id,
         )
@@ -195,6 +338,7 @@ async def handle_add_medication_text(
             name=data["name"],
             strength=data["strength"],
             dose_amount=data["dose_amount"],
+            dose_unit=data["dose_unit"],
             stock_remaining=data["stock_remaining"],
             owner_id=owner_id,
         )

@@ -23,8 +23,9 @@ MEDICATION_HEADERS = [
     "name",
     "strength",
     "dose_amount",
+    "dose_unit",
     "stock_remaining",
-    "last_refill_quantity",
+    "starting_stock",
     "soft_alert_days",
     "urgent_alert_days",
     "active",
@@ -59,6 +60,7 @@ def add_medication(
     name: str,
     strength: str,
     dose_amount: str,
+    dose_unit: str,
     stock_remaining: str,
     owner_id: str = "default",
     soft_alert_days: str = "5",
@@ -71,11 +73,12 @@ def add_medication(
         "name": name,
         "strength": strength,
         "dose_amount": dose_amount,
+        "dose_unit": dose_unit,
         "stock_remaining": stock_remaining,
+        "starting_stock": stock_remaining,
         "soft_alert_days": soft_alert_days,
         "urgent_alert_days": urgent_alert_days,
         "active": "true",
-        "last_refill_quantity": stock_remaining,
     }
 
     append_record(MEDICATION_FILE, medication, MEDICATION_HEADERS)

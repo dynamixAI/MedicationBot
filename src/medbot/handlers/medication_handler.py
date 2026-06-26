@@ -4,8 +4,6 @@ medication_handler.py
 Router for medication screens and flows.
 """
 
-from medbot.handlers.medication.detail_screen import show_medication_detail_screen
-
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -13,11 +11,11 @@ from medbot.handlers.medication.add_flow import (
     handle_add_medication_text,
     start_add_medication,
 )
+from medbot.handlers.medication.detail_screen import show_medication_detail_screen
 from medbot.handlers.medication.list_screen import show_medications_screen
 from medbot.handlers.medication.refill_flow import (
     handle_refill_text,
     select_refill_medication,
-    start_refill_medication,
 )
 
 
@@ -50,22 +48,18 @@ async def handle_medication_callback(
         await start_add_medication(update, context)
         return True
 
-    if query.data == "med_refill":
-        await start_refill_medication(update, context)
-        return True
-
     if query.data == "med_cancel":
         await cancel_medication_flow(update, context)
-        return True
-
-    if query.data.startswith("med_refill_select_"):
-        medication_id = query.data.replace("med_refill_select_", "")
-        await select_refill_medication(update, context, medication_id)
         return True
 
     if query.data.startswith("med_view_"):
         medication_id = query.data.replace("med_view_", "")
         await show_medication_detail_screen(update, medication_id)
+        return True
+
+    if query.data.startswith("med_detail_refill_"):
+        medication_id = query.data.replace("med_detail_refill_", "")
+        await select_refill_medication(update, context, medication_id)
         return True
 
     return False

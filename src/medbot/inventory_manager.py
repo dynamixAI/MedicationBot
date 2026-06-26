@@ -7,13 +7,13 @@ Handles medication stock tracking and days-remaining calculations.
 import math
 from typing import Optional
 
-from medbot.medication_manager import get_medication, edit_medication
+from medbot.medication_manager import edit_medication, get_medication
 from medbot.schedule_manager import get_schedules_for_medication
 
 
-def get_stock(medication_id: str) -> Optional[str]:
+def get_stock(medication_id: str, owner_id: str = "default") -> Optional[str]:
     """Return current stock for a medication."""
-    medication = get_medication(medication_id)
+    medication = get_medication(medication_id, owner_id)
 
     if medication is None:
         return None
@@ -21,9 +21,13 @@ def get_stock(medication_id: str) -> Optional[str]:
     return medication.get("stock_remaining")
 
 
-def reduce_stock(medication_id: str, quantity_taken: str) -> bool:
+def reduce_stock(
+    medication_id: str,
+    quantity_taken: str,
+    owner_id: str = "default",
+) -> bool:
     """Reduce medication stock after a dose is taken."""
-    medication = get_medication(medication_id)
+    medication = get_medication(medication_id, owner_id)
 
     if medication is None:
         return False
@@ -39,9 +43,13 @@ def reduce_stock(medication_id: str, quantity_taken: str) -> bool:
     )
 
 
-def add_refill(medication_id: str, quantity_added: str) -> bool:
+def add_refill(
+    medication_id: str,
+    quantity_added: str,
+    owner_id: str = "default",
+) -> bool:
     """Add refill stock to an existing medication."""
-    medication = get_medication(medication_id)
+    medication = get_medication(medication_id, owner_id)
 
     if medication is None:
         return False
@@ -55,19 +63,18 @@ def add_refill(medication_id: str, quantity_added: str) -> bool:
         medication_id,
         {
             "stock_remaining": str(new_stock),
-            "last_refill_quantity": str(quantity_added),
+            "starting_stock": str(new_stock),
         },
     )
+
 
 def set_stock(
     medication_id: str,
     new_stock: str,
+    owner_id: str = "default",
 ) -> bool:
-    """
-    Replace stock with a corrected value.
-    """
-
-    medication = get_medication(medication_id)
+    """Replace stock with a corrected value."""
+    medication = get_medication(medication_id, owner_id)
 
     if medication is None:
         return False
@@ -75,33 +82,40 @@ def set_stock(
     return edit_medication(
         medication_id,
         {
-            "stock_remaining": str(new_stock)
+            "stock_remaining": str(new_stock),
+            "starting_stock": str(new_stock),
         },
     )
 
 
-def calculate_daily_usage(medication_id: str) -> int:
-    """Calculate how many tablets/capsules are used per day."""
-    medication = get_medication(medication_id)
+def calculate_daily_usage(
+    medication_id: str,
+    owner_id: str = "default",
+) -> int:
+    """Calculate how many units are used per day."""
+    medication = get_medication(medication_id, owner_id)
 
     if medication is None:
         return 0
 
     dose_amount = int(medication.get("dose_amount", "0"))
-    schedules = get_schedules_for_medication(medication_id)
+    schedules = get_schedules_for_medication(medication_id, owner_id)
 
     return dose_amount * len(schedules)
 
 
-def calculate_days_remaining(medication_id: str) -> Optional[int]:
+def calculate_days_remaining(
+    medication_id: str,
+    owner_id: str = "default",
+) -> Optional[int]:
     """Calculate whole days of medication remaining."""
-    medication = get_medication(medication_id)
+    medication = get_medication(medication_id, owner_id)
 
     if medication is None:
         return None
 
     stock = int(medication.get("stock_remaining", "0"))
-    daily_usage = calculate_daily_usage(medication_id)
+    daily_usage = calculate_daily_usage(medication_id, owner_id)
 
     if daily_usage <= 0:
         return None
@@ -109,10 +123,13 @@ def calculate_days_remaining(medication_id: str) -> Optional[int]:
     return math.floor(stock / daily_usage)
 
 
-def is_soft_alert_due(medication_id: str) -> bool:
+def is_soft_alert_due(
+    medication_id: str,
+    owner_id: str = "default",
+) -> bool:
     """Check if soft reminder is due."""
-    medication = get_medication(medication_id)
-    days_remaining = calculate_days_remaining(medication_id)
+    medication = get_medication(medication_id, owner_id)
+    days_remaining = calculate_days_remaining(medication_id, owner_id)
 
     if medication is None or days_remaining is None:
         return False
@@ -122,10 +139,13 @@ def is_soft_alert_due(medication_id: str) -> bool:
     return days_remaining <= soft_alert_days
 
 
-def is_urgent_alert_due(medication_id: str) -> bool:
+def is_urgent_alert_due(
+    medication_id: str,
+    owner_id: str = "default",
+) -> bool:
     """Check if urgent reminder is due."""
-    medication = get_medication(medication_id)
-    days_remaining = calculate_days_remaining(medication_id)
+    medication = get_medication(medication_id, owner_id)
+    days_remaining = calculate_days_remaining(medication_id, owner_id)
 
     if medication is None or days_remaining is None:
         return False

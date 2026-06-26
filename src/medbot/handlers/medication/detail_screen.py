@@ -21,12 +21,12 @@ def stock_status_icon(days_remaining: int) -> str:
     return "🟢"
 
 
-def build_stock_bar(stock: int, last_refill_quantity: int, length: int = 20) -> str:
+def build_stock_bar(stock: int, starting_stock: int, length: int = 20) -> str:
     """Build a text progress bar."""
-    if last_refill_quantity <= 0:
-        last_refill_quantity = max(stock, 1)
+    if starting_stock <= 0:
+        starting_stock = max(stock, 1)
 
-    percentage = min(stock / last_refill_quantity, 1)
+    percentage = min(stock / starting_stock, 1)
     filled = round(percentage * length)
     empty = length - filled
 
@@ -46,22 +46,36 @@ def stock_status_message(percentage: int) -> str:
 
     return "🟢 Stock level is healthy."
 
-def stock_status_message(percentage: int) -> str:
-    """Return a friendly stock status message."""
-    if percentage <= 20:
+
+def refill_recommendation(days_remaining: int) -> str:
+    """Return calm refill guidance based on estimated days remaining."""
+    if days_remaining <= 3:
         return (
-            "🔴 Your prescription is running low.\n\n"
-            "Please arrange your next refill."
+            "Approximately 3 days or less remaining.\n\n"
+            "It may be time to arrange your next refill."
         )
 
-    if percentage <= 50:
+    if days_remaining <= 5:
         return (
-            "🟡 Consider ordering your next prescription soon."
+            "Approximately 5 days or less remaining.\n\n"
+            "You may want to order your prescription soon."
         )
 
-    return (
-        "🟢 Stock level is healthy."
-    )
+    return "You're well stocked for now."
+
+
+def plural_unit(unit: str, quantity: int) -> str:
+    """Return a simple pluralised unit."""
+    if quantity == 1:
+        return unit
+
+    if unit == "ml":
+        return "ml"
+
+    if unit.endswith("s"):
+        return unit
+
+    return f"{unit}s"
 
 
 def medication_detail_keyboard(medication_id: str) -> InlineKeyboardMarkup:
@@ -121,9 +135,11 @@ def build_medication_detail_screen(
     schedules = get_schedules_for_medication(medication_id, owner_id)
 
     dose_amount = int(medication.get("dose_amount", "0"))
+    dose_unit = medication.get("dose_unit", "unit")
     stock = int(medication.get("stock_remaining", "0"))
-    last_refill_quantity = int(
-        medication.get("last_refill_quantity")
+
+    starting_stock = int(
+        medication.get("starting_stock")
         or medication.get("stock_remaining", "1")
         or "1"
     )
@@ -132,32 +148,42 @@ def build_medication_detail_screen(
     days_remaining = stock // daily_usage if daily_usage > 0 else 0
 
     status_icon = stock_status_icon(days_remaining)
-    stock_bar = build_stock_bar(stock, last_refill_quantity)
+    stock_bar = build_stock_bar(stock, starting_stock)
+    percentage = min(round((stock / max(starting_stock, 1)) * 100), 100)
 
-    percentage = min(round((stock / max(last_refill_quantity, 1)) * 100), 100)
     status_message = stock_status_message(percentage)
+    recommendation = refill_recommendation(days_remaining)
 
     if schedules:
         reminder_lines = "\n".join(
-            f"• {schedule['time']}" for schedule in schedules
+            f"• {schedule['time']}" for schedule in sorted(schedules, key=lambda item: item["time"])
         )
     else:
         reminder_lines = "No reminder times set."
 
+    schedule_count = len(schedules)
+    schedule_label = "time per day" if schedule_count == 1 else "times per day"
+
+    dose_unit_display = plural_unit(dose_unit, dose_amount)
+    stock_unit_display = plural_unit(dose_unit, stock)
+    starting_stock_unit_display = plural_unit(dose_unit, starting_stock)
+
     return (
         f"💊 {medication['name']} {medication['strength']} {status_icon}\n\n"
-        "Everything you need to manage this medication.\n\n"
+        "📆 Daily Schedule\n"
+        f"{schedule_count} {schedule_label}\n\n"
         "💊 Dose\n"
-        f"{medication['dose_amount']} tablet/capsule\n\n"
+        f"{dose_amount} {dose_unit_display}\n\n"
         "🕒 Reminder Times\n"
         f"{reminder_lines}\n\n"
-        "📦 Current Stock\n\n"
+        "📦 Stock Remaining\n\n"
         f"{stock_bar}\n\n"
-        f"{stock} / {last_refill_quantity} tablets\n"
+        f"{stock} {stock_unit_display} / {starting_stock} {starting_stock_unit_display}\n"
         f"{percentage}% remaining\n\n"
         f"{status_message}\n\n"
         "📅 Estimated Remaining\n"
         f"{days_remaining} days\n\n"
+        f"{recommendation}\n\n"
         "────────────────\n\n"
         "Choose an action below."
     )
