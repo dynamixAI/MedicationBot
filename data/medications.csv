@@ -1,5 +1,10 @@
 owner_id,medication_id,name,strength,dose_amount,dose_unit,stock_remaining,starting_stock,soft_alert_days,urgent_alert_days,active
-7404392144,1,Fluoxetine,20mg,1,tablet,150,150,5,3,true
-7404392144,2,Cough Syrup,300mg,20,ml,500,500,5,3,true
-7404392144,3,Omeprazole,10mg,1,tablet,300,300,5,3,true
-7404392144,4,Asthma Inhaler,30mg,2,puff,300,300,5,3,true
+7404392144,1,Fluoxetine,20mg,1,tablet,258,258,5,3,true
+7404392144,2,Cough Syrup,300mg,20,ml,493,500,5,3,true
+7404392144,3,Omeprazole,10mg,1,tablet,297,300,5,3,true
+7404392144,4,Asthma Inhaler,30mg,2,puff,298,300,5,3,true
+7404392144,6,Ibruprophen,500mg,2,tablet,46,50,5,3,true
+7404392144,7,Piriton,20mg,1,tablet,47,50,5,3,true
+7404392144,8,Prednisolone,5mg,2,tablet,97,100,5,3,true
+7404392144,10,Codiene,30mg,1,tablet,47,50,5,3,true
+7404392144,11,Propa,10mg,2,tablet,50,50,5,3,true
