@@ -1,2 +1,2 @@
-owner_id,caregiver_id,name,telegram_id,active
-default,1,Test Caregiver,123456789,true
+owner_id,caregiver_id,name,telegram_username,telegram_chat_id,active
+7404392144,1,Df,@_&&,,true

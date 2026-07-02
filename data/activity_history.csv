@@ -1,2 +1,10 @@
 owner_id,event_id,event_type,medication_id,title,details,old_value,new_value,event_date,event_time
-7404392144,1,test,1,Activity Log Test,Testing activity history,,,2026-06-28,03:31
+7404392144,1,taken,10,✅ Medication Taken,Scheduled dose confirmed for 21:07.,,,2026-07-02,22:17
+7404392144,2,skipped,11,❌ Medication Skipped,Scheduled dose skipped for 22:21.,,,2026-07-02,22:31
+7404392144,3,taken,6,✅ Medication Taken,Scheduled dose confirmed for 00:08.,,,2026-07-02,22:43
+7404392144,4,skipped,7,❌ Medication Skipped,Scheduled dose skipped for 00:14.,,,2026-07-02,22:44
+7404392144,5,taken,11,✅ Medication Taken,Scheduled dose confirmed for 09:00.,,,2026-07-02,22:46
+7404392144,6,taken,10,✅ Medication Taken,Scheduled dose confirmed for 12:00.,,,2026-07-02,23:00
+7404392144,7,skipped,10,❌ Medication Skipped,Scheduled dose skipped for 06:00.,,,2026-07-02,23:24
+7404392144,8,skipped,7,❌ Medication Skipped,Scheduled dose skipped for 12:14.,,,2026-07-02,23:24
+7404392144,9,skipped,8,❌ Medication Skipped,Scheduled dose skipped for 12:35.,,,2026-07-02,23:25

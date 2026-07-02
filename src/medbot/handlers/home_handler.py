@@ -6,6 +6,7 @@ Handles MediBot home screen and main menu callbacks.
 
 from telegram import Update
 
+from medbot.handlers.health_history_screen import show_health_history_screen
 from medbot.menu_manager import back_home_keyboard, main_menu_keyboard
 from medbot.message_templates import home_dashboard_message, menu_placeholder_message
 from medbot.profile_manager import get_display_name
@@ -50,12 +51,15 @@ async def handle_main_menu_callback(update: Update) -> None:
         await show_home_from_query(update)
         return
 
+    if data == "menu_health_history":
+        await show_health_history_screen(update)
+        return
+
     screens = {
         "menu_appointments": "📅 My Appointments",
-        "menu_stock": "📦 My Stock",
-        "menu_history": "📋 My History",
         "menu_caregivers": "👥 My Caregivers",
         "menu_more": "☰ More",
+        "menu_settings": "⚙️ Settings",
     }
 
     title = screens.get(data)

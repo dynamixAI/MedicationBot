@@ -16,11 +16,11 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
                 InlineKeyboardButton("📅 My Appointments", callback_data="menu_appointments"),
             ],
             [
-                InlineKeyboardButton("📦 My Stock", callback_data="menu_stock"),
-                InlineKeyboardButton("📋 My History", callback_data="menu_history"),
+                InlineKeyboardButton("👥 My Caregivers", callback_data="menu_caregivers"),
+                InlineKeyboardButton("📊 Health History", callback_data="menu_health_history"),
             ],
             [
-                InlineKeyboardButton("👥 My Caregivers", callback_data="menu_caregivers"),
+                InlineKeyboardButton("⚙️ Settings", callback_data="menu_settings"),
                 InlineKeyboardButton("☰ More", callback_data="menu_more"),
             ],
         ]
@@ -30,7 +30,5 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
 def back_home_keyboard() -> InlineKeyboardMarkup:
     """Back to home keyboard."""
     return InlineKeyboardMarkup(
-        [
-            [InlineKeyboardButton("⬅️ Home", callback_data="menu_home")]
-        ]
+        [[InlineKeyboardButton("⬅️ Home", callback_data="menu_home")]]
     )
