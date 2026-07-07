@@ -2,16 +2,6 @@
 storage.py
 
 Generic CSV storage layer for MedicationBot.
-
-This module handles low-level CSV operations:
-- load records
-- append records
-- find records
-- update records
-- delete records
-- generate next IDs
-
-The rest of the app should use this layer instead of reading/writing CSV directly.
 """
 
 from pathlib import Path
@@ -23,7 +13,7 @@ DATA_DIR = Path("data")
 
 
 def ensure_file_exists(filename: str, headers: List[str]) -> None:
-    """Create a CSV file with headers if it does not already exist."""
+    DATA_DIR.mkdir(exist_ok=True)
     file_path = DATA_DIR / filename
 
     if not file_path.exists() or file_path.stat().st_size == 0:
@@ -32,8 +22,11 @@ def ensure_file_exists(filename: str, headers: List[str]) -> None:
             writer.writerow(headers)
 
 
+def clean_record(record: Dict[str, str], headers: List[str]) -> Dict[str, str]:
+    return {header: record.get(header, "") or "" for header in headers}
+
+
 def load_records(filename: str) -> List[Dict[str, str]]:
-    """Load all records from a CSV file."""
     file_path = DATA_DIR / filename
 
     if not file_path.exists() or file_path.stat().st_size == 0:
@@ -41,26 +34,31 @@ def load_records(filename: str) -> List[Dict[str, str]]:
 
     with open(file_path, "r", newline="", encoding="utf-8") as file:
         reader = csv.DictReader(file)
-        return list(reader)
+        records = []
+
+        for record in reader:
+            record.pop(None, None)
+            records.append(record)
+
+        return records
 
 
 def save_records(filename: str, records: List[Dict[str, str]], headers: List[str]) -> None:
-    """Save all records to a CSV file, replacing existing content."""
+    DATA_DIR.mkdir(exist_ok=True)
     file_path = DATA_DIR / filename
+    clean_records = [clean_record(record, headers) for record in records]
 
     with open(file_path, "w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=headers)
         writer.writeheader()
-        writer.writerows(records)
+        writer.writerows(clean_records)
 
 
 def append_record(filename: str, record: Dict[str, str], headers: List[str]) -> None:
-    """Add a new record to a CSV file."""
     ensure_file_exists(filename, headers)
-
     file_path = DATA_DIR / filename
+    clean = clean_record(record, headers)
 
-    # Make sure existing file ends with a newline before appending.
     if file_path.exists() and file_path.stat().st_size > 0:
         with open(file_path, "rb+") as file:
             file.seek(-1, 2)
@@ -71,22 +69,17 @@ def append_record(filename: str, record: Dict[str, str], headers: List[str]) -> 
 
     with open(file_path, "a", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=headers)
-        writer.writerow(record)
+        writer.writerow(clean)
 
 
 def find_record(filename: str, key: str, value: str) -> Optional[Dict[str, str]]:
-    """Find a single record where key equals value."""
-    records = load_records(filename)
-
-    for record in records:
+    for record in load_records(filename):
         if record.get(key) == value:
             return record
-
     return None
 
 
 def get_next_id(filename: str, id_field: str) -> str:
-    """Get the next numeric ID for a CSV file."""
     records = load_records(filename)
 
     if not records:
@@ -111,7 +104,6 @@ def update_record(
     updates: Dict[str, str],
     headers: List[str],
 ) -> bool:
-    """Update a record where key equals value."""
     records = load_records(filename)
     updated = False
 
@@ -133,7 +125,6 @@ def delete_record(
     value: str,
     headers: List[str],
 ) -> bool:
-    """Delete a record where key equals value."""
     records = load_records(filename)
     original_count = len(records)
 
